@@ -22,10 +22,16 @@ class LoveAppDocumentLoader {
     LoveAppDocumentLoader(ResourcePatternResolver resourcePatternResolver) {
         this.resourcePatternResolver = resourcePatternResolver;
     }
+
+    /**
+     * 加载文档，不用经过特殊处理
+     * @return
+     */
     public List<Document> loadMarkdowns(){
         List<Document> allDocument=new ArrayList<>();
 
         try {
+            // 这里可以修改为你要加载的多个 Markdown 文件的路径模式
             Resource[] resources = resourcePatternResolver.getResources("classpath:document/*.md");
             for (Resource resource : resources) {
                 String filename = resource.getFilename();
@@ -33,6 +39,7 @@ class LoveAppDocumentLoader {
                         .withHorizontalRuleCreateDocument(true)
                         .withIncludeCodeBlock(false)
                         .withIncludeBlockquote(false)
+                        //将文件元信息，如文件名，保存，以便可以精确检索
                         .withAdditionalMetadata("filename", filename)
                         .build();
                 MarkdownDocumentReader markdownDocumentReader = new MarkdownDocumentReader(resource, config);

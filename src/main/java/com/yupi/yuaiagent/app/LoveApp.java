@@ -4,10 +4,13 @@ package com.yupi.yuaiagent.app;
 import com.yupi.yuaiagent.advisor.BannedWordsAdvisor;
 import com.yupi.yuaiagent.advisor.MyLoggerAdvisor;
 
+import jakarta.annotation.Resources;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 
 import org.springframework.ai.chat.model.ChatModel;
@@ -16,6 +19,8 @@ import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 
 
 import org.springframework.ai.model.Media;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -41,7 +46,7 @@ public class LoveApp {
      * @param ollamaChatModel
      */
 
-    public LoveApp(ChatModel ollamaChatModel,ChatMemory chatMemory,Resource systemResource){
+    public LoveApp(ChatModel ollamaChatModel, ChatMemory chatMemory, Resource systemResource){
         // 在构造函数中初始化 SystemPromptTemplate
         if (systemResource.exists()) {
             this.systemPromptTemplate = new SystemPromptTemplate(systemResource);
@@ -149,7 +154,39 @@ public class LoveApp {
     }
 
 
+    //AI数据库知识问答功能
+    @Autowired
+    private VectorStore loveAppvectorStore;
 
+
+    @jakarta.annotation.Resource
+    private Advisor loveAppRagCloudAdvisor;
+    /**
+     * 和Rag知识库进行对话
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public String doChatWithRag(String message,String chatId){
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                .user(message)
+                //开启多轮对话
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                //开启日志
+                //.advisors(new MyLoggerAdvisor())
+                //应用RAG知识库问答
+                .advisors(new QuestionAnswerAdvisor(loveAppvectorStore))
+                //应用RAG检索增强服务（基于云知识库）
+                //.advisors(loveAppRagCloudAdvisor)
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content:{}",content);
+        return content;
+
+    }
 
 
 }
