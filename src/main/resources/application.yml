@@ -1,0 +1,57 @@
+server:
+  port: 8123
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: yu-ai-agent
+  profiles:
+    active: local
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:mysql://192.168.10.5:3306/yu_ai_agent?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB       # 设置单个文件的最大大小
+      max-request-size: 10MB    # 设置整个请求的最大大小
+
+
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: gemma3:12b
+#        model: deepseek-r1:32b
+chat:
+  memory:
+    type: file  # 可以设置为 "mysql", "file", 或 "memory"
+
+mybatis:
+  # 这个位置是 MyBatis 映射文件的路径，确保 XML 文件位置正确
+  mapper-locations: classpath:mapper/*.xml
+  # 设置 MyBatis 映射的类路径（简化 Mapper 接口的使用）
+  type-aliases-package: com.yupi.yuaiagent.domain.dto
+
+# springdoc-openapi
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.yupi.yuaiagent
+# knife4j
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
