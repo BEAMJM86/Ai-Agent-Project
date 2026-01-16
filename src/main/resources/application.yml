@@ -11,25 +11,40 @@ spring:
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: jdbc:mysql://192.168.10.5:3306/yu_ai_agent?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: root
-    password: 1234
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    mysql:
+      url: jdbc:mysql://192.168.10.5:3306/yu_ai_agent?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+      username: root
+      password: 1234
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    postgresql:
+      url: jdbc:postgresql://192.168.10.5:5432/yu_ai_agent
+      username: root
+      password: 1234
+      driver-class-name: org.postgresql.Driver
+
   servlet:
     multipart:
       enabled: true
       max-file-size: 10MB       # 设置单个文件的最大大小
       max-request-size: 10MB    # 设置整个请求的最大大小
-
-
   ai:
     ollama:
       base-url: http://localhost:11434
       chat:
         model: qwen3:14b
-#        model: deepseek-r1:32b
+        #model: deepseek-r1:32b #32b模型会超时！
+        #model: gemma3:12b #rag提示词是英文的，会导致用户输入中文，Ai回复英文
       embedding:
         model: nomic-embed-text
+
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        dimensions: 768 #默认为1536，但是nomic-embed-text是768
+        distance-type: COSINE_DISTANCE
+        max-document-batch-size: 10000 # Optional: Maximum number of documents per batch
+
+
 
 chat:
   memory:

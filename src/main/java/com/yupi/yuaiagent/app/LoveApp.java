@@ -21,6 +21,7 @@ import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.model.Media;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -156,11 +157,15 @@ public class LoveApp {
 
     //AI数据库知识问答功能
     @Autowired
+    @Qualifier("loveAppVectorStore")
     private VectorStore loveAppvectorStore;
 
 
     @jakarta.annotation.Resource
     private Advisor loveAppRagCloudAdvisor;
+
+    @Autowired
+    private VectorStore pgVectorVectorStore;
     /**
      * 和Rag知识库进行对话
      * @param message
@@ -174,12 +179,14 @@ public class LoveApp {
                 //开启多轮对话
                 .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
-                //开启日志
-                //.advisors(new MyLoggerAdvisor())
-                //应用RAG知识库问答
-                .advisors(new QuestionAnswerAdvisor(loveAppvectorStore))
-                //应用RAG检索增强服务（基于云知识库）
-                //.advisors(loveAppRagCloudAdvisor)
+//                //开启日志
+//                .advisors(new MyLoggerAdvisor())
+//                //应用简单的官方RAG知识库问答（基于内存存储）
+//                .advisors(new QuestionAnswerAdvisor(loveAppvectorStore))
+//                //应用RAG检索增强服务（基于云知识库）
+//                .advisors(loveAppRagCloudAdvisor)
+                //应用本地RAG检索增强服务基于（本地PGVector向量存储数据库）
+                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();

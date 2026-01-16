@@ -133,12 +133,35 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
 
+        <!--  markdown文档读取器  -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-markdown-document-reader</artifactId>
             <version>1.0.0-M6</version>
         </dependency>
 
+        <!-- 手整合PGVector向量存储 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-pgvector-store</artifactId>
+            <version>1.0.0-M6</version>
+        </dependency>
+
+        <!-- 自动整合PGVector向量存储 （会导致bean自动注入冲突）-->
+        <!-- <dependency> -->
+        <!--     <groupId>org.springframework.ai</groupId> -->
+        <!--     <artifactId>spring-ai-starter-vector-store-pgvector</artifactId> -->
+        <!--     <version>1.0.0-M7</version> -->
+        <!-- </dependency> -->
 
 
     </dependencies>
