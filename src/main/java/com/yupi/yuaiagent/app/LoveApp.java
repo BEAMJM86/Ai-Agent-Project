@@ -4,6 +4,8 @@ package com.yupi.yuaiagent.app;
 import com.yupi.yuaiagent.advisor.BannedWordsAdvisor;
 import com.yupi.yuaiagent.advisor.MyLoggerAdvisor;
 
+import com.yupi.yuaiagent.rag.LoveAppRagCustomAdvisorFactory;
+import com.yupi.yuaiagent.rag.QueryRewriter;
 import jakarta.annotation.Resources;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -166,6 +168,9 @@ public class LoveApp {
 
     @Autowired
     private VectorStore pgVectorVectorStore;
+
+    @jakarta.annotation.Resource
+    private QueryRewriter queryRewriter;
     /**
      * 和Rag知识库进行对话
      * @param message
@@ -173,20 +178,29 @@ public class LoveApp {
      * @return
      */
     public String doChatWithRag(String message,String chatId){
+        //查询重写
+        String rewrittenMessage = queryRewriter.doQueryRewrite(message);
         ChatResponse chatResponse = chatClient
                 .prompt()
-                .user(message)
+                //使用改写后的查询
+                .user(rewrittenMessage)
                 //开启多轮对话
                 .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
 //                //开启日志
 //                .advisors(new MyLoggerAdvisor())
-//                //应用简单的官方RAG知识库问答（基于内存存储）
-//                .advisors(new QuestionAnswerAdvisor(loveAppvectorStore))
+                //应用RAG知识库问答（基于内存存储）
+                .advisors(new QuestionAnswerAdvisor(loveAppvectorStore))
 //                //应用RAG检索增强服务（基于云知识库）
 //                .advisors(loveAppRagCloudAdvisor)
                 //应用本地RAG检索增强服务基于（本地PGVector向量存储数据库）
-                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
+                //.advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
+                //应用自定义的RAG检索增强服务（文档查询器+上下文增强）
+//                .advisors(
+//                        LoveAppRagCustomAdvisorFactory.createLoveAppRagCustomAdvisor(
+//                                loveAppvectorStore,"已婚"
+//                        )
+//                )
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();

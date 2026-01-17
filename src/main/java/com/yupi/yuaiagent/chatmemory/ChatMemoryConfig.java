@@ -1,7 +1,5 @@
-package com.yupi.yuaiagent.config;
+package com.yupi.yuaiagent.chatmemory;
 
-import com.yupi.yuaiagent.chatmemory.FileBasedChatMemory;
-import com.yupi.yuaiagent.chatmemory.MysqlKryoChatMemory;
 import com.yupi.yuaiagent.mapper.AiChatMemoryMapper;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;

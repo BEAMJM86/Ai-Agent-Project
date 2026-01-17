@@ -23,12 +23,27 @@ public class LoveAppVectorStoreConfig {
     @Resource
     private LoveAppDocumentLoader documentLoader;
 
+    @Resource
+    private MyTokenTextSplitter myTokenTextSplitter;
+
+    @Resource
+    private MyKeywordEnricher myKeywordEnricher;
+
     @Bean
     VectorStore loveAppVectorStore(EmbeddingModel ollamaEmbeddingModel){
         SimpleVectorStore simpleVectorStore = SimpleVectorStore.builder(ollamaEmbeddingModel).build();
         //从资源路径加载的文档信息
         List<Document> documents = documentLoader.loadMarkdowns();
-        //将文档信息通过embedding处理保存到向量数据库
+
+//        //自主切分文档，不建议用这种切词器，容易破坏语义完整性
+//        List<Document> splitDocuments = myTokenTextSplitter.splitDocuments(documents);
+
+//        //自动补充关键词信息（这里打开会导致耗时增加）
+//        List<Document> enrichDocuments = myKeywordEnricher.enrichDocuments(documents);
+//        //将文档信息通过embedding处理保存到向量数据库
+//        simpleVectorStore.doAdd(enrichDocuments);
+
+        //将文档信息通过embedding处理保存到向量数据库(基于内存)
         simpleVectorStore.doAdd(documents);
         return simpleVectorStore;
     }
