@@ -21,6 +21,8 @@ import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 
 
 import org.springframework.ai.model.Media;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -67,7 +69,7 @@ public class LoveApp {
                         //new ReReadingAdvisor()
                         //自定义违禁词拦截器
                         BannedWordsAdvisor.builder()
-                                .addWords(List.of("科比", "劳大"))
+                                .addWords(List.of("违禁词1", "违禁词2"))
                                 .mode(BannedWordsAdvisor.Mode.MASK)
                                 .order(1) // 越小越先执行，尽量早拦截
                                 .build()
@@ -187,8 +189,6 @@ public class LoveApp {
                 //开启多轮对话
                 .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
-//                //开启日志
-//                .advisors(new MyLoggerAdvisor())
                 //应用RAG知识库问答（基于内存存储）
                 .advisors(new QuestionAnswerAdvisor(loveAppvectorStore))
 //                //应用RAG检索增强服务（基于云知识库）
@@ -209,6 +209,52 @@ public class LoveApp {
 
     }
 
+    //Ai恋爱知识库调用工具能力
+    @jakarta.annotation.Resource
+    private ToolCallback[] allTools;
+    /**
+     * AI 恋爱报告功能（支持调用工具)
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public String doChatWithTools(String message, String chatId){
+
+        String systemPrompt = systemPromptTemplate.render();
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .advisors(new MyLoggerAdvisor())
+                .tools(allTools)
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content:{}",content);
+        return content;
+    }
+
+    /**
+     * Ai调用MCP服务
+     */
+    @jakarta.annotation.Resource
+    private ToolCallbackProvider toolCallbackProvider;
+    public String doChatWithMcp(String message, String chatId){
+
+        String systemPrompt = systemPromptTemplate.render();
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .tools(toolCallbackProvider)
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content:{}",content);
+        return content;
+    }
 
 }
 

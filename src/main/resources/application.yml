@@ -27,6 +27,7 @@ spring:
       enabled: true
       max-file-size: 10MB       # 设置单个文件的最大大小
       max-request-size: 10MB    # 设置整个请求的最大大小
+
   ai:
     ollama:
       base-url: http://localhost:11434
@@ -43,6 +44,18 @@ spring:
         dimensions: 768 #默认为1536，但是nomic-embed-text是768
         distance-type: COSINE_DISTANCE
         max-document-batch-size: 10000 # Optional: Maximum number of documents per batch
+
+    mcp:
+      client:
+#        stdio:
+#          servers-configuration: classpath:mcp-servers.json
+
+        sse:
+          connections:
+            server1:
+              url: http://localhost:8127
+        # stdio:
+        # servers-configuration: classpath:mcp-servers.json
 
 
 
