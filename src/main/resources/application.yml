@@ -47,15 +47,14 @@ spring:
 
     mcp:
       client:
-#        stdio:
-#          servers-configuration: classpath:mcp-servers.json
-
-        sse:
-          connections:
-            server1:
-              url: http://localhost:8127
-        # stdio:
-        # servers-configuration: classpath:mcp-servers.json
+        #SEE模式需要新开一个窗口运行yu-image-search-mcp-server程序
+#        sse:
+#          connections:
+#            server1:
+#              url: http://localhost:8127
+        #stdio模式需要将yu-image-search-mcp-server打包成jar包
+         stdio:
+         servers-configuration: classpath:mcp-servers.json
 
 
 
