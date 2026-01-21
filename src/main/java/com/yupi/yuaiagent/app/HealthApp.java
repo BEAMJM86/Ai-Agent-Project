@@ -1,19 +1,19 @@
 package com.yupi.yuaiagent.app;
 
 
-import com.yupi.yuaiagent.advisor.BannedWordsAdvisor;
 import com.yupi.yuaiagent.advisor.MyLoggerAdvisor;
 import com.yupi.yuaiagent.rag.QueryRewriter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
-import org.springframework.ai.chat.client.advisor.api.Advisor;
+
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.ai.model.Media;
+
+import org.springframework.ai.content.Media;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -30,8 +30,7 @@ import reactor.core.publisher.Flux;
 import java.io.IOException;
 import java.util.List;
 
-import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
-import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
+
 
 @Component
 @Slf4j
@@ -59,17 +58,12 @@ public class HealthApp {
         chatClient = ChatClient.builder(ollamaChatModel)
                 .defaultSystem(systemPrompt)
                 .defaultAdvisors(
-                        new MessageChatMemoryAdvisor(chatMemory),
+                        MessageChatMemoryAdvisor.builder(chatMemory).build(),
                         //自定义日志advisor，按需开启
-                        new MyLoggerAdvisor(),
+                        new MyLoggerAdvisor()
                         //自定义推理增强advisor，按需开启
                         //new ReReadingAdvisor()
                         //自定义违禁词拦截器
-                        BannedWordsAdvisor.builder()
-                                .addWords(List.of("违禁词1", "违禁词2"))
-                                .mode(BannedWordsAdvisor.Mode.MASK)
-                                .order(1) // 越小越先执行，尽量早拦截
-                                .build()
                 )
                 .build();
     }
@@ -84,8 +78,7 @@ public class HealthApp {
         ChatResponse chatResponse = chatClient
                 .prompt()
                 .user(message)
-                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();
@@ -105,8 +98,7 @@ public class HealthApp {
                 .user(message)
                 //应用RAG知识库问答（基于内存存储）
                 .advisors(new QuestionAnswerAdvisor(healthAppvectorStore))
-                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 .stream()
                 .content();
     }
@@ -136,8 +128,7 @@ public class HealthApp {
         // 创建 chatResponse 请求
         ChatResponse chatResponse = chatClient
                 .prompt()
-                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 .user(u -> u.text(message)
                         .media(media)  // 使用 Media 对象
                 )
@@ -177,8 +168,7 @@ public class HealthApp {
                 //使用改写后的查询
                 .user(message)
                 //开启多轮对话
-                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 //应用RAG知识库问答（基于内存存储）
                 .advisors(new QuestionAnswerAdvisor(healthAppvectorStore))
 //                //应用RAG检索增强服务（基于云知识库）
@@ -214,10 +204,9 @@ public class HealthApp {
         ChatResponse chatResponse = chatClient
                 .prompt()
                 .user(message)
-                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 .advisors(new MyLoggerAdvisor())
-                .tools(allTools)
+                .toolCallbacks(allTools)
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();
@@ -236,8 +225,7 @@ public class HealthApp {
         ChatResponse chatResponse = chatClient
                 .prompt()
                 .user(message)
-                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 .tools(toolCallbackProvider)
                 .call()
                 .chatResponse();

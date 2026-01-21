@@ -2,7 +2,8 @@ package com.yupi.yuaiagent.chatmemory;
 
 import com.yupi.yuaiagent.mapper.AiChatMemoryMapper;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +20,10 @@ public class ChatMemoryConfig {
             String fileDir = System.getProperty("user.dir") + "/tmp/chat-memory";
             return new FileBasedChatMemory(fileDir);
         } else {
-            return new InMemoryChatMemory();  // 默认使用内存存储
+            return MessageWindowChatMemory.builder()
+                    .chatMemoryRepository(new InMemoryChatMemoryRepository())
+                    .maxMessages(20)
+                    .build();  // 默认使用内存存储
         }
     }
 }

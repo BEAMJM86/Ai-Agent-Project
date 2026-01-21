@@ -30,18 +30,54 @@
         <java.version>17</java.version>
     </properties>
 
+    <!-- spring ai 和 Alibaba 基础依赖 -->
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.alibaba.cloud.ai</groupId>
+                <artifactId>spring-ai-alibaba-bom</artifactId>
+                <version>1.0.0.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
-                <version>1.0.0-M6</version>
+                <version>1.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
+
     </dependencyManagement>
+
+
+
+    <!-- 添加spring ai快照仓库 -->
+    <repositories>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <name>Central Portal Snapshots</name>
+            <id>central-portal-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+
 
     <dependencies>
         <dependency>
@@ -80,8 +116,7 @@
         <!--spring-ai-alibaba-->
         <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>
-            <artifactId>spring-ai-alibaba-starter</artifactId>
-            <version>1.0.0-M6.1</version>
+            <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
         </dependency>
         <!--langchain4j-->
         <dependency>
@@ -92,8 +127,7 @@
         <!-- https://docs.spring.io/spring-ai/reference/api/chat/ollama-chat.html -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
-            <version>1.0.0-M6</version>
+            <artifactId>spring-ai-starter-model-ollama</artifactId>
         </dependency>
         <!-- json 结构化输出  -->
         <dependency>
@@ -112,7 +146,7 @@
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>3.0.5</version> <!-- 降级到与Spring Boot 3.x兼容的版本 -->
+            <version>3.0.5</version>
         </dependency>
         <!-- MyBatis core -->
         <dependency>
@@ -127,17 +161,10 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Spring Boot Starter DataSource -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-        </dependency>
-
         <!--  markdown文档读取器  -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-markdown-document-reader</artifactId>
-            <version>1.0.0-M6</version>
         </dependency>
 
         <!-- 手整合PGVector向量存储 -->
@@ -153,7 +180,6 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-pgvector-store</artifactId>
-            <version>1.0.0-M6</version>
         </dependency>
 
         <!-- 自动整合PGVector向量存储 （会导致bean自动注入冲突）-->
@@ -188,10 +214,18 @@
         <!-- Spring Ai MCP Client -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-mcp-client-spring-boot-starter</artifactId>
-            <version>1.0.0-M6</version>
+            <artifactId>spring-ai-starter-mcp-client</artifactId>
         </dependency>
-
+        <!-- 使用QuestionAnswerAdvisor需要引入新的依赖 -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-advisors-vector-store</artifactId>
+        </dependency>
+        <!-- &lt;!&ndash; RetrievalAugmentationAdvisor依赖 &ndash;&gt; -->
+        <!-- <dependency> -->
+        <!--     <groupId>org.springframework.ai</groupId> -->
+        <!--     <artifactId>spring-ai-rag</artifactId> -->
+        <!-- </dependency> -->
 
     </dependencies>
 
@@ -225,35 +259,5 @@
         </plugins>
     </build>
 
-    <!-- 需要引入仓库配置，才能下载到最新的 Spring AI 相关的依赖 -->
-    <repositories>
-        <repository>
-            <id>spring-milestones</id>
-            <name>Spring Milestones</name>
-            <url>https://repo.spring.io/milestone</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>spring-snapshots</id>
-            <name>Spring Snapshots</name>
-            <url>https://repo.spring.io/snapshot</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <name>Central Portal Snapshots</name>
-            <id>central-portal-snapshots</id>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
 </project>

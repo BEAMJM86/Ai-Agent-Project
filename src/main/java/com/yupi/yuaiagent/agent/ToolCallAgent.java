@@ -48,6 +48,12 @@ public abstract class ToolCallAgent extends ReActAgent{
         super();
         this.availableTools=availableTools;
         this.toolCallingManager=ToolCallingManager.builder().build();
+
+        // 如果采用DashScope，需要禁用 Spring AI 内置的工具调用机制，自己维护选项和消息上下文
+//        this.chatOptions = DashScopeChatOptions.builder()
+//                .withInternalToolExecutionEnabled(false)
+//                .build();
+
         chatOptions = OllamaOptions.builder()
                 //.toolCallbacks(availableTools)
                 .internalToolExecutionEnabled(false)
@@ -72,7 +78,7 @@ public abstract class ToolCallAgent extends ReActAgent{
             Prompt prompt=new Prompt(messageList,this.chatOptions);
             ChatResponse chatResponse = getOllamaChatClient().prompt(prompt)
                     .system(getSystemPrompt())
-                    .tools(availableTools)
+                    .toolCallbacks(availableTools)
                     .call()
                     .chatResponse();
 

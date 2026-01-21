@@ -3,6 +3,7 @@ package com.yupi.yuaiagent.agent;
 import com.yupi.yuaiagent.advisor.MyLoggerAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
+
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.stereotype.Component;
@@ -44,7 +45,7 @@ public class MyManus extends ToolCallAgent{
         ChatClient chatClient = ChatClient.builder(ollamaChatModel)
                 .defaultAdvisors(new MyLoggerAdvisor())
                 //添加MCP工具
-                .defaultTools(toolCallbackProvider)
+                .defaultToolCallbacks(toolCallbackProvider)
                 .build();
         this.setOllamaChatClient(chatClient);
     }

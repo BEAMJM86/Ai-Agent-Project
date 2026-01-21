@@ -24,7 +24,7 @@ public class ChatMemoryTestRunner implements CommandLineRunner {
         ));
 
         // 2) 读取最后 N 条
-        List<org.springframework.ai.chat.messages.Message> last = chatMemory.get(convId, 10);
+        List<org.springframework.ai.chat.messages.Message> last = chatMemory.get(convId);
 
         System.out.println("=== 从 ChatMemory 读取 ===");
         last.forEach(m -> System.out.println(m.getMessageType() + " -> " + m.getText()));

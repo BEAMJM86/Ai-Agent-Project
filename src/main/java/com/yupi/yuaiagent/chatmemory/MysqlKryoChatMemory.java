@@ -53,14 +53,11 @@ public class MysqlKryoChatMemory implements ChatMemory {
     }
 
     @Override
-    public List<Message> get(String conversationId, int lastN) {
-        if (conversationId == null || conversationId.isBlank() || lastN <= 0) {
+    public List<Message> get(String conversationId) {
+        if (conversationId == null || conversationId.isBlank() ) {
             return List.of();
         }
-
-        List<Message> all = getAll(conversationId);
-        int from = Math.max(0, all.size() - lastN);
-        return all.subList(from, all.size());
+        return getAll(conversationId);
     }
 
     @Override
