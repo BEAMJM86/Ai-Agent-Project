@@ -1,6 +1,7 @@
 package com.yupi.yuaiagent.controller;
 
 import com.yupi.yuaiagent.agent.MyManus;
+import com.yupi.yuaiagent.app.HealthApp;
 import com.yupi.yuaiagent.app.LoveApp;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.model.ChatModel;
@@ -20,7 +21,7 @@ import java.io.IOException;
 public class AiController {
 
     @Resource
-    private LoveApp loveApp;
+    private HealthApp healthApp;
 
     @Resource
     private ToolCallback[] allTools;
@@ -34,13 +35,13 @@ public class AiController {
 
     @GetMapping("/love_app/chat/sync")
     public String doChatWithLoveAppSync(String message, String chatId) {
-        return loveApp.doChat(message, chatId);
+        return healthApp.doChat(message, chatId);
     }
 
 
     @GetMapping(value = "/love_app/chat/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> doChatWithLoveAppSSE(String message, String chatId) {
-        return loveApp.doChatByStream(message, chatId);
+        return healthApp.doChatByStream(message, chatId);
     }
 
 
@@ -49,7 +50,7 @@ public class AiController {
         // 创建一个超时时间较长的 SseEmitter
         SseEmitter emitter = new SseEmitter(180000L); // 3分钟超时
         // 获取 Flux 数据流并直接订阅
-        loveApp.doChatByStream(message, chatId)
+        healthApp.doChatByStream(message, chatId)
                 .subscribe(
                         // 处理每条消息
                         chunk -> {

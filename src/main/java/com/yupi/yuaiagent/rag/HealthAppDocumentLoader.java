@@ -14,12 +14,12 @@ import java.util.List;
 
 @Component
 @Slf4j
-class LoveAppDocumentLoader {
+class HealthAppDocumentLoader {
 
     private final ResourcePatternResolver resourcePatternResolver;
 
 
-    LoveAppDocumentLoader(ResourcePatternResolver resourcePatternResolver) {
+    HealthAppDocumentLoader(ResourcePatternResolver resourcePatternResolver) {
         this.resourcePatternResolver = resourcePatternResolver;
     }
 
@@ -32,7 +32,7 @@ class LoveAppDocumentLoader {
 
         try {
             // 这里可以修改为你要加载的多个 Markdown 文件的路径模式
-            Resource[] resources = resourcePatternResolver.getResources("classpath:document/love/*.md");
+            Resource[] resources = resourcePatternResolver.getResources("classpath:document/health/*.md");
             for (Resource resource : resources) {
                 String filename = resource.getFilename();
                 String status = filename.substring(filename.length() - 6, filename.length() - 4);

@@ -57,10 +57,9 @@ spring:
          servers-configuration: classpath:mcp-servers.json
 
 
-
 chat:
   memory:
-    type: file  # 可以设置为 "mysql", "file", 或 "memory"
+    type: file  #对话记忆保存方式 可以设置为 "mysql", "file", 或 "memory"
 
 mybatis:
   # 这个位置是 MyBatis 映射文件的路径，确保 XML 文件位置正确

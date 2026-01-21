@@ -3,29 +3,23 @@ package com.yupi.yuaiagent.app;
 
 import com.yupi.yuaiagent.advisor.BannedWordsAdvisor;
 import com.yupi.yuaiagent.advisor.MyLoggerAdvisor;
-
-import com.yupi.yuaiagent.rag.LoveAppRagCustomAdvisorFactory;
 import com.yupi.yuaiagent.rag.QueryRewriter;
-import jakarta.annotation.Resources;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-
-
 import org.springframework.ai.model.Media;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -41,7 +35,7 @@ import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvis
 
 @Component
 @Slf4j
-public class LoveApp {
+public class HealthApp {
 
     private final ChatClient chatClient;
 
@@ -52,7 +46,7 @@ public class LoveApp {
      * @param ollamaChatModel
      */
 
-    public LoveApp(ChatModel ollamaChatModel, ChatMemory chatMemory, Resource systemResource){
+    public HealthApp(ChatModel ollamaChatModel, ChatMemory chatMemory, @Value("classpath:/prompts/system-message.st")Resource systemResource){
         // 在构造函数中初始化 SystemPromptTemplate
         if (systemResource.exists()) {
             this.systemPromptTemplate = new SystemPromptTemplate(systemResource);
@@ -60,6 +54,8 @@ public class LoveApp {
             throw new IllegalStateException("System prompt resource not found.");
         }
         String systemPrompt = systemPromptTemplate.render();
+
+
         chatClient = ChatClient.builder(ollamaChatModel)
                 .defaultSystem(systemPrompt)
                 .defaultAdvisors(
@@ -107,41 +103,14 @@ public class LoveApp {
         return chatClient
                 .prompt()
                 .user(message)
+                //应用RAG知识库问答（基于内存存储）
+                .advisors(new QuestionAnswerAdvisor(healthAppvectorStore))
                 .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
                 .stream()
                 .content();
     }
 
-
-
-
-
-
-    record LoveReport(String title, List<String>suggestions) {
-
-    }
-
-    /**
-     * AI 恋爱报告功能（支持结构化输出)
-     * @param message
-     * @param chatId
-     * @return
-     */
-    public LoveReport doChatWithReport(String message, String chatId){
-
-        String systemPrompt = systemPromptTemplate.render();
-        LoveReport loveReport = chatClient
-                .prompt()
-                .system( systemPrompt+ "每次对话后都要生成恋爱结果，标题为{用户名}的恋爱报告，内容为建议列表")
-                .user(message)
-                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
-                .call()
-                .entity(LoveReport.class);
-        log.info("loveReport:{}",loveReport);
-        return loveReport;
-    }
 
     // ✅ 新增：图片 + 文本 多模态
     public String doChatWithImage(String message, MultipartFile image, String chatId) throws IOException {
@@ -181,19 +150,19 @@ public class LoveApp {
 
 
     //AI数据库知识问答功能
-    @Autowired
-    @Qualifier("loveAppVectorStore")
-    private VectorStore loveAppvectorStore;
+    @jakarta.annotation.Resource
+    @Qualifier("healthAppVectorStore")
+    private VectorStore healthAppvectorStore;
 
 
 //    @jakarta.annotation.Resource
 //    private Advisor loveAppRagCloudAdvisor;
-//
+
 //    @Autowired
 //    private VectorStore pgVectorVectorStore;
 
-    @jakarta.annotation.Resource
-    private QueryRewriter queryRewriter;
+//    @jakarta.annotation.Resource
+//    private QueryRewriter queryRewriter;
     /**
      * 和Rag知识库进行对话
      * @param message
@@ -202,16 +171,16 @@ public class LoveApp {
      */
     public String doChatWithRag(String message,String chatId){
         //查询重写
-        String rewrittenMessage = queryRewriter.doQueryRewrite(message);
+        //String rewrittenMessage = queryRewriter.doQueryRewrite(message);
         ChatResponse chatResponse = chatClient
                 .prompt()
                 //使用改写后的查询
-                .user(rewrittenMessage)
+                .user(message)
                 //开启多轮对话
                 .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
                 //应用RAG知识库问答（基于内存存储）
-                .advisors(new QuestionAnswerAdvisor(loveAppvectorStore))
+                .advisors(new QuestionAnswerAdvisor(healthAppvectorStore))
 //                //应用RAG检索增强服务（基于云知识库）
 //                .advisors(loveAppRagCloudAdvisor)
                 //应用本地RAG检索增强服务基于（本地PGVector向量存储数据库）
