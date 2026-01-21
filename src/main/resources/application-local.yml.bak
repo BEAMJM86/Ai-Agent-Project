@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: yu-ai-agent
+  ai:
+    dashscope:
+      api-key: 改成你的apikey
+      chat:
+        options:
+          model: qwen-plus
+
+# searchAPI
+search-api:
+  api-key: 改成你的apikey

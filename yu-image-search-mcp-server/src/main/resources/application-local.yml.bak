@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: yu-image-search-mcp-server
+
+pexels-api:
+  api-key: 改成你的apikey

@@ -8,7 +8,7 @@ import java.util.Scanner;
  * AskHuman 工具示例
  * 模拟在多智能体框架中向人类请求输入的功能
  */
-@Component
+//@Component
 public class AskHumanTool {
 
     /**

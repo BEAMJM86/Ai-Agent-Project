@@ -31,6 +31,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MimeType;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.util.List;
@@ -60,7 +61,7 @@ public class LoveApp {
         }
         String systemPrompt = systemPromptTemplate.render();
         chatClient = ChatClient.builder(ollamaChatModel)
-                //.defaultSystem(systemPrompt)
+                .defaultSystem(systemPrompt)
                 .defaultAdvisors(
                         new MessageChatMemoryAdvisor(chatMemory),
                         //自定义日志advisor，按需开启
@@ -95,6 +96,26 @@ public class LoveApp {
         //log.info("chatId:{},message:{},response:{}",chatId,message,content);
         return content;
     }
+
+    /**
+     * AI 基础对话（支持多轮对话记忆，支持流式调用)
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public Flux<String> doChatByStream(String message, String chatId) {
+        return chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .stream()
+                .content();
+    }
+
+
+
+
 
 
     record LoveReport(String title, List<String>suggestions) {

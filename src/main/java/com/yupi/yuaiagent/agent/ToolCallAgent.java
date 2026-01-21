@@ -101,8 +101,8 @@ public abstract class ToolCallAgent extends ReActAgent{
             }
         } catch (Exception e) {
             //异常处理
-            log.error(getName() +"的工具调用异常",e.getMessage());
-            getMessageList().add(new AssistantMessage("处理时遇到了错误"+e.getMessage()));
+            log.error(getName() +"的工具调用异常："+e.getMessage());
+            getMessageList().add(new AssistantMessage("处理时遇到了错误："+e.getMessage()));
             return false;
 
         }
@@ -136,7 +136,7 @@ public abstract class ToolCallAgent extends ReActAgent{
 
 
         String results = toolResponseMessage.getResponses().stream()
-                .map(response -> "工具" + response.name() + "返回结果" + response.responseData())
+                .map(response -> "工具(" + response.name() + ")返回结果: " + response.responseData())
                 .collect(Collectors.joining("/n"));
         log.info(results);
         return results;
